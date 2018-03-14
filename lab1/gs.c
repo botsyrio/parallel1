@@ -146,7 +146,7 @@ int calc(){
 	float xNew[num];
 	int done = false;
 	int numIt = 0;
-	while(!done){
+	while(done == false){
 		for(int i=0; i<num; i++){
 			float localSum=0;
 			for(int j=0; j<num; j++){
