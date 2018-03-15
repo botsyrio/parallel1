@@ -148,15 +148,15 @@ void get_input(char filename[])
 /************************************************************/
 int calc(){
 	
-	const int recvCounts[comm_sz];
+	int recvCounts[comm_sz];
 	for(int i=0; i<comm_sz; i++){
 		int count = num/comm_sz;
 		if(i<num%comm_sz)
 			count++;
-		recvCounts[i] = (const int) count;
+		recvCounts[i] = count;
 	}
 	
-	const int displs[comm_sz];
+	int displs[comm_sz];
 	displs[0]=0;
 	for(int i=1; i<comm_sz; i++)
 		displs[i]=displs[i-1]+recvCounts[i-1];
@@ -188,7 +188,7 @@ int calc(){
 				locUnf++;
 		}
 		MPI_Allreduce(&locUnf, &gloUnf, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-		MPI_Allgatherv(&xNew, recvCounts[my_rank], MPI_FLOAT, &x, num, displs, MPI_FLOAT, MPI_COMM_WORLD);
+		MPI_Allgatherv(&xNew, recvCounts[my_rank], MPI_FLOAT, &x, num, &displs, MPI_FLOAT, MPI_COMM_WORLD);
 		numIt++;
 	}
 	return numIt;
