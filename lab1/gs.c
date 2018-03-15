@@ -150,9 +150,10 @@ int calc(){
 	
 	int recvCounts[comm_sz];
 	for(int i=0; i<comm_sz; i++){
-		recvCounts[i] = num/comm_sz;
+		int count = num/comm_sz;
 		if(i<num%comm_sz)
-			recvCounts[i]++;
+			count++;
+		recvCounts[i] = count;
 	}
 	
 	int displs[comm_sz];
