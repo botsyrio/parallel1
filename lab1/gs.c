@@ -161,7 +161,7 @@ int calc(){
 	for(int i=1; i<comm_sz; i++)
 		displs[i]=displs[i-1]+recvCounts[i-1];
 	
-	
+	printf("process %d has constructed both arrays\n", my_rank);
 	float xNew[recvCounts[my_rank]];
 	
 	int locUnf = 0;//contains the number of Xs calculated by the current process which have not yet met the error parameters
@@ -188,7 +188,9 @@ int calc(){
 				locUnf++;
 		}
 		MPI_Allreduce(&locUnf, &gloUnf, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+		printf("process %d has completed all reduce," my_rank)
 		MPI_Allgatherv(&xNew, recvCounts[my_rank], MPI_FLOAT, &x, (const int *)&recvCounts, (const int*)&displs, MPI_FLOAT, MPI_COMM_WORLD);
+		printf("process %d has completed all Gather," my_rank)
 		numIt++;
 	}
 	return numIt;
