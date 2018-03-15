@@ -216,14 +216,23 @@ int main(int argc, char *argv[])
 	}
 	  
 	/* Read the input file and fill the global data structure above */ 
-	get_input(argv[1]);
+	if(my_rank ==0){
+		get_input(argv[1]);
 	 
 	/* Check for convergence condition */
 	/* This function will exit the program if the coffeicient will never converge to 
 	 * the needed absolute error. 
 	 * This is not expected to happen for this programming assignment.
 	 */
-	check_matrix();
+		check_matrix();
+		
+		
+	}
+	MPI_Bcast(num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(*a, num*num, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(x, num, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(b, num, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(err, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	
 	nit = calc();
 	
