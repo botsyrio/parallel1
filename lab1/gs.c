@@ -161,7 +161,7 @@ int calc(){
 	for(int i=1; i<comm_sz; i++)
 		displs[i]=displs[i-1]+recvCounts[i-1];
 	
-	printf("process %d has constructed both arrays\n", my_rank);
+	//printf("process %d has constructed both arrays\n", my_rank);
 	float xNew[recvCounts[my_rank]];
 	
 	int locUnf = 0;//contains the number of Xs calculated by the current process which have not yet met the error parameters
@@ -178,7 +178,7 @@ int calc(){
 			xNew[i-displs[my_rank]]=(b[i]-localSum)/a[i][i];
 			
 		}
-		printf("process %d has completed its local calculations\n", my_rank);
+		//printf("process %d has completed its local calculations\n", my_rank);
 		locUnf=0;
 		float error;
 		for(int i =displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
@@ -188,11 +188,11 @@ int calc(){
 			if(error>err)
 				locUnf++;
 		}
-		printf("process %d has completed its error \n", my_rank);
+		//printf("process %d has completed its error \n", my_rank);
 		MPI_Allreduce(&locUnf, &gloUnf, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-		printf("process %d has completed all reduce, locUnf is %d, gloUnf is %d \n", my_rank, locUnf, gloUnf);
+		//printf("process %d has completed all reduce, locUnf is %d, gloUnf is %d \n", my_rank, locUnf, gloUnf);
 		MPI_Allgatherv(xNew, recvCounts[my_rank], MPI_FLOAT, x, (const int *)recvCounts, (const int*)displs, MPI_FLOAT, MPI_COMM_WORLD);
-		printf("process %d has completed all Gather\n", my_rank);
+		//printf("process %d has completed all Gather\n", my_rank);
 		numIt++;
 	}
 	return numIt;
