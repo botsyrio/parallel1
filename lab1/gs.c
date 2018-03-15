@@ -188,9 +188,9 @@ int calc(){
 				locUnf++;
 		}
 		MPI_Allreduce(&locUnf, &gloUnf, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-		printf("process %d has completed all reduce," my_rank)
+		printf("process %d has completed all reduce\n", my_rank);
 		MPI_Allgatherv(&xNew, recvCounts[my_rank], MPI_FLOAT, &x, (const int *)&recvCounts, (const int*)&displs, MPI_FLOAT, MPI_COMM_WORLD);
-		printf("process %d has completed all Gather," my_rank)
+		printf("process %d has completed all Gather\n", my_rank);
 		numIt++;
 	}
 	return numIt;
