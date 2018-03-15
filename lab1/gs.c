@@ -181,7 +181,7 @@ int calc(){
 		printf("process %d has completed its local calculations\n", my_rank);
 		locUnf=0;
 		float error;
-		for(int i =displs[my_rank]; i=displs[my_rank]+recvCounts[my_rank]; i++){
+		for(int i =displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
 			error = ((xNew[i-displs[my_rank]]-x[i])/xNew[i-displs[my_rank]]);
 			if(error<0)
 				error = -1*error;
