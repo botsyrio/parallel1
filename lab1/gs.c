@@ -19,7 +19,7 @@ int my_rank, comm_sz;
 void check_matrix(); /* Check whether the matrix will converge */
 void get_input();  /* Read input from file */
 
-int calc(); /
+int calc(); 
 
 /********************************/
 
@@ -148,14 +148,15 @@ void get_input(char filename[])
 /************************************************************/
 int calc(){
 	
-	int recvCounts[comm_sz];
+	const int recvCounts[comm_sz];
 	for(int i=0; i<comm_sz; i++){
-		recvCounts[i] = num/comm_sz;
+		int count = num/comm_sz;
 		if(i<num%comm_sz)
-			recvCounts[i]++;
+			count++;
+		recvCounts[i] = (const int) count;
 	}
 	
-	int displs[comm_sz];
+	const int displs[comm_sz];
 	displs[0]=0;
 	for(int i=1; i<comm_sz; i++)
 		displs[i]=displs[i-1]+recvCounts[i-1];
