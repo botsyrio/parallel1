@@ -17,6 +17,8 @@ int true = 1;
 void check_matrix(); /* Check whether the matrix will converge */
 void get_input();  /* Read input from file */
 
+int calc(); /
+
 /********************************/
 
 
