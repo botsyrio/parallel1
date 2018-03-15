@@ -157,7 +157,7 @@ int calc(){
 			
 		}
 		done=true;
-		int error;
+		float error;
 		for(int i =0; i<num; i++){
 			error = ((xNew[i]-x[i])/xNew[i]);
 			if(error<0)
