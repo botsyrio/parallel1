@@ -188,7 +188,7 @@ int calc(){
 				locUnf++;
 		}
 		MPI_Allreduce(&locUnf, &gloUnf, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-		MPI_Allgatherv(&xNew, recvCounts[my_rank], MPI_FLOAT, &x, num, &displs, MPI_FLOAT, MPI_COMM_WORLD);
+		MPI_Allgatherv(&xNew, recvCounts[my_rank], MPI_FLOAT, &x, (const int *)&recvCounts, (const int*)&displs, MPI_FLOAT, MPI_COMM_WORLD);
 		numIt++;
 	}
 	return numIt;
