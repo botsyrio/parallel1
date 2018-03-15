@@ -228,11 +228,11 @@ int main(int argc, char *argv[])
 		
 		
 	}
-	MPI_Bcast(num, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(*a, num*num, MPI_FLOAT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(x, num, MPI_FLOAT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(b, num, MPI_FLOAT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(err, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Bcast((void*)&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast((void*)*a, num*num, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Bcast((void*)x, num, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Bcast((void*)b, num, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Bcast((void*)&err, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	
 	nit = calc();
 	
