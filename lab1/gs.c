@@ -187,7 +187,7 @@ int calc(){
 				locUnf++;
 		}
 		MPI_Allreduce(&locUnf, &gloUnf, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-		MPI_Allgatherv(&xNew, recvCounts[my_rank], MPI_FLOAT, &x, num, &displs, MPI_FLOAT, MPI_COMM_WORLD);
+		MPI_Allgatherv(&xNew, recvCounts[my_rank], MPI_FLOAT, &x, num, displs, MPI_FLOAT, MPI_COMM_WORLD);
 		numIt++;
 	}
 	return numIt;
@@ -195,7 +195,7 @@ int calc(){
 
 int main(int argc, char *argv[])
 {
-	MPI_Init(argc, argv);
+	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
 		
