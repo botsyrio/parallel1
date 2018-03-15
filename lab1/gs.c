@@ -12,6 +12,7 @@ float err; /* The absolute relative error */
 int num = 0;  /* number of unknowns */
 int false = 0;
 int true = 1;
+int my_rank, comm_sz;
 
 /****** Function declarations */
 void check_matrix(); /* Check whether the matrix will converge */
@@ -145,30 +146,47 @@ void get_input(char filename[])
 
 /************************************************************/
 int calc(){
-	float xNew[num];
-	int done = false;
+	
+	int recvCounts[comm_sz];
+	for(int i=0; i<comm_sz; i++){
+		recvCounts[i] = num/comm_sz;
+		if(i<num%comm_sz)
+			recvCounts[i]++;
+	}
+	
+	int displs[comm_sz];
+	displs[0]=0;
+	for(int i=1; i<comm_sz; i++)
+		displs[i]=displs[i-1]+recvCounts[i-1];
+	
+	
+	float xNew[recvCounts[my_rank]];
+	
+	int locUnf = 0;//contains the number of Xs calculated by the current process which have not yet met the error parameters
+	int gloUnf = 1;//contains the number of Xs across all processes which have not yet met the error parameters -- initialized to 1
 	int numIt = 0;
-	while(done == false){
-		for(int i=0; i<num; i++){
+	
+	while(gloUnf !=0){		
+		for(int i=displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
 			float localSum=0;
 			for(int j=0; j<num; j++){
 				if(j!=i)
 					localSum +=(a[i][j]*x[j]);
 			}
-			xNew[i]=(b[i]-localSum)/a[i][i];
+			xNew[i-displs[my_rank]]=(b[i]-localSum)/a[i][i];
 			
 		}
-		done=true;
+		locUnf=0;
 		float error;
-		for(int i =0; i<num; i++){
-			error = ((xNew[i]-x[i])/xNew[i]);
+		for(int i =displs[my_rank]; displs[my_rank]+recvCounts[my_rank]; i++){
+			error = ((xNew[i-displs[my_rank]]-x[i])/xNew[i-displs[my_rank]]);
 			if(error<0)
 				error = -1*error;
 			if(error>err)
-				done = false;
-			x[i] = xNew[i];
-			//printf("x%d: %f\n",i,x[i]);
+				locUnf++;
 		}
+		MPI_Allreduce(&locUnf, &gloUnf, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+		MPI_Allgatherv(&xNew, recvCounts[my_rank], MPI_FLOAT, &x, num, &displs, MPI_FLOAT, MPI_COMM_WORLD);
 		numIt++;
 	}
 	return numIt;
@@ -176,46 +194,50 @@ int calc(){
 
 int main(int argc, char *argv[])
 {
-
- int i;
- int nit = 0; /* number of iterations */
- FILE * fp;
- char output[100] ="";
-  
- if( argc != 2)
- {
-   printf("Usage: ./gsref filename\n");
-   exit(1);
- }
-  
- /* Read the input file and fill the global data structure above */ 
- get_input(argv[1]);
- 
- /* Check for convergence condition */
- /* This function will exit the program if the coffeicient will never converge to 
-  * the needed absolute error. 
-  * This is not expected to happen for this programming assignment.
-  */
- check_matrix();
- 
- nit = calc();
- 
- /* Writing results to file */
- sprintf(output,"%d.sol",num);
- fp = fopen(output,"w");
- if(!fp)
- {
-   printf("Cannot create the file %s\n", output);
-   exit(1);
- }
-    
- for( i = 0; i < num; i++)
-   fprintf(fp,"%f\n",x[i]);
- 
- printf("total number of iterations: %d\n", nit);
- 
- fclose(fp);
- 
- exit(0);
+	MPI_Init(argc, argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
+		
+	int i;
+	int nit = 0; /* number of iterations */
+	FILE * fp;
+	char output[100] ="";
+	  
+	if( argc != 2)
+	{
+		printf("Usage: ./gsref filename\n");
+		exit(1);
+	}
+	  
+	/* Read the input file and fill the global data structure above */ 
+	get_input(argv[1]);
+	 
+	/* Check for convergence condition */
+	/* This function will exit the program if the coffeicient will never converge to 
+	 * the needed absolute error. 
+	 * This is not expected to happen for this programming assignment.
+	 */
+	check_matrix();
+	
+	nit = calc();
+	
+	if(my_rank==0){
+		/* Writing results to file */
+		sprintf(output,"%d.sol",num);
+		fp = fopen(output,"w");
+		if(!fp)
+		{
+		printf("Cannot create the file %s\n", output);
+		exit(1);
+		}
+			
+		for( i = 0; i < num; i++)
+			fprintf(fp,"%f\n",x[i]);
+		 
+		printf("total number of iterations: %d\n", nit);
+		 
+		fclose(fp);
+	}
+	exit(0);
 
 }
