@@ -165,6 +165,7 @@ int calc(){
 			if(error>err)
 				done = false;
 			x[i] = xNew[i];
+			printf("x%d: %f",i,x[i]);
 		}
 		numIt++;
 	}
