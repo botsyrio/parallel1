@@ -191,13 +191,10 @@ int calc(){
 		//printf("process %d has completed its error \n", my_rank);
 		MPI_Allreduce(&locUnf, &gloUnf, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 		//printf("process %d has completed all reduce, locUnf is %d, gloUnf is %d \n", my_rank, locUnf, gloUnf);
-		if(gloUnf!=0)
-			MPI_Allgatherv(xNew, recvCounts[my_rank], MPI_FLOAT, x, (const int *)recvCounts, (const int*)displs, MPI_FLOAT, MPI_COMM_WORLD);
-			
+		MPI_Allgatherv(xNew, recvCounts[my_rank], MPI_FLOAT, x, (const int *)recvCounts, (const int*)displs, MPI_FLOAT, MPI_COMM_WORLD);
 		//printf("process %d has completed all Gather\n", my_rank);
 		numIt++;
 	}
-	MPI_Gatherv(xNew, recvCounts[my_rank], MPI_FLOAT, x, (const int *)recvCounts, (const int*)displs, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	return numIt;
 }
 
