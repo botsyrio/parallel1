@@ -160,7 +160,7 @@ void get_input(char filename[])
    /* reading the b element */
    fscanf(fp,"%f ",&b[i]);
  }
- MPI_Scatterv(*a, recvCounts, displs, MPI_FLOAT, *a, recvCount[my_rank], MPI_FLOAT, 0, MPI_COMM_WORLD);
+ MPI_Scatterv(*a, recvCounts, displs, MPI_FLOAT, *a, recvCounts[my_rank], MPI_FLOAT, 0, MPI_COMM_WORLD);
  
  
  fclose(fp); 
