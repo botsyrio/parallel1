@@ -201,16 +201,16 @@ int calc(){
 	int numIt = 0;
 	
 	while(gloUnf !=0){		
-		/*for(int i=displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
+		for(int i=displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
 			float localSum=0;
 			for(int j=0; j<num; j++){
 				if(j!=i)
-					localSum +=(a[i][j]*x[j]);
+					localSum +=(a[i-displs[my_rank]][j]*x[j]);
 			}
 			xNew[i-displs[my_rank]]=(b[i]-localSum)/a[i][i];
 			
-		}*/
-		for(int i=0; i<recvCounts[my_rank]; i++){
+		}
+		/*for(int i=0; i<recvCounts[my_rank]; i++){
 			float localSum=0;
 			for(int j=0; j<num; j++){
 				if(j!=i)
@@ -218,24 +218,24 @@ int calc(){
 			}
 			xNew[i]=(b[i]-localSum)/a[i][i];
 			
-		}
+		}*/
 		//printf("process %d has completed its local calculations\n", my_rank);
 		locUnf=0;
 		float error;
-		/*for(int i =displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
+		for(int i =displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
 			error = ((xNew[i-displs[my_rank]]-x[i])/xNew[i-displs[my_rank]]);
 			if(error<0)
 				error = -1*error;
 			if(error>err)
 				locUnf++;
-		}*/
-		for(int i =0; i<recvCounts[my_rank]; i++){
+		}
+		/*for(int i =0; i<recvCounts[my_rank]; i++){
 			error = ((xNew[i]-x[i+displs[my_rank]])/xNew[i]);
 			if(error<0)
 				error = -1*error;
 			if(error>err)
 				locUnf++;
-		}
+		}*/
 		//printf("process %d has completed its error \n", my_rank);
 		MPI_Allreduce(&locUnf, &gloUnf, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 		//printf("process %d has completed all reduce, locUnf is %d, gloUnf is %d \n", my_rank, locUnf, gloUnf);
