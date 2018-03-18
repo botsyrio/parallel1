@@ -118,7 +118,7 @@ void get_input(char filename[])
 	printf("Cannot allocate a!\n");
 	exit(1);
   }
-
+if(my_rank==0){
  for(i = 0; i < num; i++) 
   {
     a[i] = (float *)malloc(num * sizeof(float)); 
@@ -128,7 +128,16 @@ void get_input(char filename[])
 		exit(1);
   	}
   }
- 
+}
+else{	
+	for(i = 0; i < recvCounts[my_rank]; i++) {
+		a[i] = (float *)malloc(num * sizeof(float)); 
+		if( !a[i]){
+			printf("Cannot allocate a[%d]!\n",i);
+			exit(1);
+		}
+	}
+}
  x = (float *) malloc(num * sizeof(float));
  if( !x)
   {
