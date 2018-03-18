@@ -169,9 +169,9 @@ else{
    /* reading the b element */
    fscanf(fp,"%f ",&b[i]);
  }
- printf("howdy");
+ printf("howdy from %d\n",my_rank);
  MPI_Scatterv(*a, recvCounts, displs, MPI_FLOAT, *a, recvCounts[my_rank], MPI_FLOAT, 0, MPI_COMM_WORLD);
- printf("do");
+ printf("do from %d\n",my_rank);
  
  fclose(fp); 
 
