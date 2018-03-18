@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
 	 * the needed absolute error. 
 	 * This is not expected to happen for this programming assignment.
 	 */
-	check_matrix();
+	//check_matrix();
 	
 	nit = calc();
 	
