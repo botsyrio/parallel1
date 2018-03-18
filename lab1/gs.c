@@ -93,32 +93,13 @@ void get_input(char filename[])
  fscanf(fp,"%f ",&err);
 
  /* Now, time to allocate the matrices and vectors */
-
-	int recvCounts[comm_sz];
-	for(int i=0; i<comm_sz; i++){
-		int count = num/comm_sz*num;
-		if(i<num%comm_sz)
-			count++;
-		recvCounts[i] = count;
-	}
-	
-	int displs[comm_sz];
-	displs[0]=0;
-	for(int i=1; i<comm_sz; i++)
-		displs[i]=displs[i-1]+recvCounts[i-1];
-	
- if(my_rank == 0)
-	a = (float**)malloc(num * sizeof(float*));
-
- else
-	a = (float**)malloc(recvCounts[my_rank]/num * sizeof(float*));
-  
+ a = (float**)malloc(num * sizeof(float*));
  if( !a)
   {
 	printf("Cannot allocate a!\n");
 	exit(1);
   }
-if(my_rank==0){
+
  for(i = 0; i < num; i++) 
   {
     a[i] = (float *)malloc(num * sizeof(float)); 
@@ -128,16 +109,7 @@ if(my_rank==0){
 		exit(1);
   	}
   }
-}
-else{	
-	for(i = 0; i < recvCounts[my_rank]; i++) {
-		a[i] = (float *)malloc(num * sizeof(float)); 
-		if( !a[i]){
-			printf("Cannot allocate a[%d]!\n",i);
-			exit(1);
-		}
-	}
-}
+ 
  x = (float *) malloc(num * sizeof(float));
  if( !x)
   {
@@ -161,17 +133,12 @@ else{
  
  for(i = 0; i < num; i++)
  {
-	if(my_rank==0){
-		for(j = 0; j < num; j++)
-			fscanf(fp,"%f ",&a[i][j]);
-	}
+   for(j = 0; j < num; j++)
+     fscanf(fp,"%f ",&a[i][j]);
    
    /* reading the b element */
    fscanf(fp,"%f ",&b[i]);
  }
- printf("howdy from %d\n",my_rank);
- MPI_Scatterv(*a, recvCounts, displs, MPI_FLOAT, *a, recvCounts[my_rank], MPI_FLOAT, 0, MPI_COMM_WORLD);
- printf("do from %d\n",my_rank);
  
  fclose(fp); 
 
@@ -206,21 +173,12 @@ int calc(){
 			float localSum=0;
 			for(int j=0; j<num; j++){
 				if(j!=i)
-					localSum +=(a[i-displs[my_rank]][j]*x[j]);
+					localSum +=(a[i][j]*x[j]);
 			}
 			xNew[i-displs[my_rank]]=(b[i]-localSum)/a[i][i];
 			
 		}
-		/*for(int i=0; i<recvCounts[my_rank]; i++){
-			float localSum=0;
-			for(int j=0; j<num; j++){
-				if(j!=i)
-					localSum +=(a[i][j]*x[j]);
-			}
-			xNew[i]=(b[i]-localSum)/a[i][i];
-			
-		}*/
-		printf("process %d has completed its local calculations\n", my_rank);
+		//printf("process %d has completed its local calculations\n", my_rank);
 		locUnf=0;
 		float error;
 		for(int i =displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
@@ -230,13 +188,6 @@ int calc(){
 			if(error>err)
 				locUnf++;
 		}
-		/*for(int i =0; i<recvCounts[my_rank]; i++){
-			error = ((xNew[i]-x[i+displs[my_rank]])/xNew[i]);
-			if(error<0)
-				error = -1*error;
-			if(error>err)
-				locUnf++;
-		}*/
 		//printf("process %d has completed its error \n", my_rank);
 		MPI_Allreduce(&locUnf, &gloUnf, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 		//printf("process %d has completed all reduce, locUnf is %d, gloUnf is %d \n", my_rank, locUnf, gloUnf);
@@ -274,7 +225,7 @@ int main(int argc, char *argv[])
 	 * the needed absolute error. 
 	 * This is not expected to happen for this programming assignment.
 	 */
-	//check_matrix();
+	check_matrix();
 	
 	nit = calc();
 	
