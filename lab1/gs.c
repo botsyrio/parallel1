@@ -220,7 +220,7 @@ int calc(){
 			xNew[i]=(b[i]-localSum)/a[i][i];
 			
 		}*/
-		//printf("process %d has completed its local calculations\n", my_rank);
+		printf("process %d has completed its local calculations\n", my_rank);
 		locUnf=0;
 		float error;
 		for(int i =displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
