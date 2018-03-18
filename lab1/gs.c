@@ -93,7 +93,26 @@ void get_input(char filename[])
  fscanf(fp,"%f ",&err);
 
  /* Now, time to allocate the matrices and vectors */
- a = (float**)malloc(num * sizeof(float*));
+
+	int recvCounts[comm_sz];
+	for(int i=0; i<comm_sz; i++){
+		int count = num/comm_sz*num;
+		if(i<num%comm_sz)
+			count++;
+		recvCounts[i] = count;
+	}
+	
+	int displs[comm_sz];
+	displs[0]=0;
+	for(int i=1; i<comm_sz; i++)
+		displs[i]=displs[i-1]+recvCounts[i-1];
+	
+ if(my_rank == 0)
+	a = (float**)malloc(num * sizeof(float*));
+
+ else
+	a = (float**)malloc(recvCounts[my_rank]/num * sizeof(float*));
+  
  if( !a)
   {
 	printf("Cannot allocate a!\n");
@@ -133,12 +152,16 @@ void get_input(char filename[])
  
  for(i = 0; i < num; i++)
  {
-   for(j = 0; j < num; j++)
-     fscanf(fp,"%f ",&a[i][j]);
+	if(my_rank==0){
+		for(j = 0; j < num; j++)
+			fscanf(fp,"%f ",&a[i][j]);
+	}
    
    /* reading the b element */
    fscanf(fp,"%f ",&b[i]);
  }
+ MPI_Scatterv(*a, recvCounts, displs, MPI_FLOAT, *a, recvCount[my_rank], MPI_FLOAT, 0, MPI_COMM_WORLD);
+ 
  
  fclose(fp); 
 
@@ -169,7 +192,7 @@ int calc(){
 	int numIt = 0;
 	
 	while(gloUnf !=0){		
-		for(int i=displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
+		/*for(int i=displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
 			float localSum=0;
 			for(int j=0; j<num; j++){
 				if(j!=i)
@@ -177,12 +200,28 @@ int calc(){
 			}
 			xNew[i-displs[my_rank]]=(b[i]-localSum)/a[i][i];
 			
+		}*/
+		for(int i=0; i<recvCounts[my_rank]; i++){
+			float localSum=0;
+			for(int j=0; j<num; j++){
+				if(j!=i)
+					localSum +=(a[i][j]*x[j]);
+			}
+			xNew[i]=(b[i]-localSum)/a[i][i];
+			
 		}
 		//printf("process %d has completed its local calculations\n", my_rank);
 		locUnf=0;
 		float error;
-		for(int i =displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
+		/*for(int i =displs[my_rank]; i<displs[my_rank]+recvCounts[my_rank]; i++){
 			error = ((xNew[i-displs[my_rank]]-x[i])/xNew[i-displs[my_rank]]);
+			if(error<0)
+				error = -1*error;
+			if(error>err)
+				locUnf++;
+		}*/
+		for(int i =0; i<recvCounts[my_rank]; i++){
+			error = ((xNew[i]-x[i+displs[my_rank]])/xNew[i]);
 			if(error<0)
 				error = -1*error;
 			if(error>err)
